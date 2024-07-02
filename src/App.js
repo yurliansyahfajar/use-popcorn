@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const tempMovieData = [
   {
@@ -47,21 +47,75 @@ const tempWatchedData = [
   },
 ];
 
+const KEY = "ba57a252";
+
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
+  const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
+  const [isLoading, setIsloading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
+  const tempQuery = query;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsloading(true);
+        setError("");
+        const res = await fetch(
+          `https://www.omdbapi.com/?apikey=${KEY}&s=${tempQuery}`
+        );
+
+        if (!res.ok) {
+          throw new Error("Something Went Wrong when fetching the data");
+        }
+
+        const data = await res.json();
+
+        if (data.Response === "False") {
+          throw new Error("Result not found");
+        }
+
+        setMovies(data.Search);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsloading(false);
+      }
+    };
+
+    if (query.length < 3) {
+      setMovies([]);
+      setError("");
+      return;
+    }
+
+    fetchData();
+  }, [query]);
+
   return (
     <>
       <Navbar>
-        <Search />
+        <Search search={query} onSearch={setQuery} />
         <NumResults movies={movies} />
       </Navbar>
       <Main>
         <Box>
-          <MovieList movies={movies} />
+          {!query && !error && (
+            <NotifyMessage message={"Please search your movie"}>
+              <span>🔍</span>
+            </NotifyMessage>
+          )}
+          {isLoading && <Loader />}
+          {!error && !isLoading && <MovieList movies={movies} />}
+          {error && (
+            <NotifyMessage message={error}>
+              <span>⛔</span>
+            </NotifyMessage>
+          )}
         </Box>
         <Box>
           <WatchedSummary watched={watched} />
@@ -69,6 +123,14 @@ export default function App() {
         </Box>
       </Main>
     </>
+  );
+}
+
+function NotifyMessage({ children, message }) {
+  return (
+    <p className="error">
+      {children} {message}
+    </p>
   );
 }
 
@@ -100,15 +162,15 @@ function NumResults({ movies }) {
   );
 }
 
-function Search() {
-  const [query, setQuery] = useState("");
+function Search({ search, onSearch }) {
   return (
     <input
       className="search"
       type="text"
       placeholder="Search movies..."
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
+      value={search}
+      onChange={(e) => onSearch(e.target.value)}
+      // onBlur={}
     />
   );
 }
@@ -135,6 +197,10 @@ function Box({ children }) {
       {isOpen && children}
     </div>
   );
+}
+
+function Loader() {
+  return <p className="loader">Loading...</p>;
 }
 
 /*
