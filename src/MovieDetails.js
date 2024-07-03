@@ -60,6 +60,15 @@ export function MovieDetails({
     fetchMovieByID();
   }, [selectedID]);
 
+  useEffect(() => {
+    if (!title) return;
+    document.title = `Movie | ${title}`;
+
+    return () => {
+      document.title = "usePopcorn App";
+    };
+  }, [title]);
+
   return (
     <div className="details">
       {isLoading ? (
