@@ -4,11 +4,11 @@ import PropTypes from "prop-types";
 const containerStyle = {
   display: "flex",
   alignItems: "center",
-  gap: "16px"
+  gap: "16px",
 };
 
 const starContainerStyle = {
-  display: "flex"
+  display: "flex",
 };
 
 StarRating.propTypes = {
@@ -17,8 +17,8 @@ StarRating.propTypes = {
   className: PropTypes.string,
   color: PropTypes.string,
   size: PropTypes.number,
-  messages: PropTypes.array
-  //   onSetRating: PropTypes.func
+  messages: PropTypes.array,
+  onSetRating: PropTypes.func,
 };
 
 export default function StarRating({
@@ -27,8 +27,8 @@ export default function StarRating({
   className = "",
   color = "#fcc419",
   size = 48,
-  messages = []
-  //   onSetRating
+  messages = [],
+  onSetRating,
 }) {
   const [rating, setRating] = useState(defaultRating);
   const [tempRating, setTempRating] = useState(0);
@@ -36,12 +36,12 @@ export default function StarRating({
     lineHeight: "1",
     margin: "0",
     color,
-    fontSize: `${size / 1.5}px`
+    fontSize: `${size / 1.5}px`,
   };
 
   function onHandleRating(rating) {
     setRating(rating);
-    // onSetRating(rating);
+    onSetRating(rating);
   }
 
   return (
@@ -73,7 +73,7 @@ function Star({ onRate, onRateInHover, onRateOutHover, full, size, color }) {
     display: "block",
     height: `${size}px`,
     width: `${size}px`,
-    cursor: "pointer"
+    cursor: "pointer",
   };
   return (
     <span
