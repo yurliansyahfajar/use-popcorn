@@ -61,6 +61,20 @@ export function MovieDetails({
   }, [selectedID]);
 
   useEffect(() => {
+    const callback = (e) => {
+      if (e.code === "Escape") {
+        onCloseMovieDetails();
+      }
+    };
+
+    document.addEventListener("keydown", callback);
+
+    return function () {
+      document.removeEventListener("keydown", callback);
+    };
+  }, [onCloseMovieDetails]);
+
+  useEffect(() => {
     if (!title) return;
     document.title = `Movie | ${title}`;
 
