@@ -10,6 +10,7 @@ import { NumResults } from "./NumResults";
 import { Search } from "./Search";
 import { WatchedMovieList } from "./WatchedMovieList";
 import { WatchedSummary } from "./WatchedSummary";
+import { useMovies } from "./useMovies";
 
 export const KEY = "ba57a252";
 
@@ -17,15 +18,16 @@ export const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
-  const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(function () {
     const storedValue = localStorage.getItem("watched");
     return JSON.parse(storedValue);
   });
-  const [isLoading, setIsloading] = useState(false);
   const [query, setQuery] = useState("");
-  const [error, setError] = useState("");
   const [selectedID, setSelectedID] = useState(null);
+  const { movies, isLoading, error } = useMovies(
+    query,
+    handleCloseMovieDetails
+  );
 
   function handleSelectedMovie(id) {
     setSelectedID((selectedID) => (id === selectedID ? null : id));
@@ -46,53 +48,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("watched", JSON.stringify(watched));
   }, [watched]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchMovies = async () => {
-      try {
-        setIsloading(true);
-        setError("");
-        const res = await fetch(
-          `https://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-          { signal: controller.signal }
-        );
-
-        if (!res.ok) {
-          throw new Error("Something Went Wrong when fetching the data");
-        }
-
-        const data = await res.json();
-
-        if (data.Response === "False") {
-          throw new Error("Result not found");
-        }
-
-        setMovies(data.Search);
-        setError("");
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          console.log(error.message);
-          setError(error.message);
-        }
-      } finally {
-        setIsloading(false);
-      }
-    };
-
-    if (query.length < 3) {
-      setMovies([]);
-      setError("");
-      return;
-    }
-
-    handleCloseMovieDetails();
-    fetchMovies();
-
-    return function () {
-      controller.abort();
-    };
-  }, [query]);
 
   return (
     <>
