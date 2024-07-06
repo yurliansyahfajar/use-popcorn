@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader } from "./Loader";
 import StarRating from "./StarRating";
 import { KEY } from "./App";
+import { useKey } from "./useKey";
 
 export function MovieDetails({
   watched,
@@ -66,19 +67,7 @@ export function MovieDetails({
     fetchMovieByID();
   }, [selectedID]);
 
-  useEffect(() => {
-    const callback = (e) => {
-      if (e.code === "Escape") {
-        onCloseMovieDetails();
-      }
-    };
-
-    document.addEventListener("keydown", callback);
-
-    return function () {
-      document.removeEventListener("keydown", callback);
-    };
-  }, [onCloseMovieDetails]);
+  useKey("Escape", onCloseMovieDetails);
 
   useEffect(() => {
     if (!title) return;
